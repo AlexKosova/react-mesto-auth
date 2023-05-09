@@ -62,6 +62,9 @@ export default function App () {
   const [currentUser, setCurrentUser] = React.useState({});
   const [cards, setCards] = React.useState([]);
 
+  const [buttonText, setButtonText] = React.useState('Создать')
+  const [buttonProfileText, setButtonProfileText] = React.useState('Сохранить')
+
   React.useEffect(() => {
     if (isLoggedIn) {
         Promise.all([api.getUserInfo(), api.getInitialCards()])
@@ -148,31 +151,40 @@ export default function App () {
 
   function handleCardDelete (card) {
     api.deleteCard(card._id).then(() => {
-      setCards(cards.filter((c) => c._id !== card._id)).catch((err) => {
-        console.log(err);
-      })
-  })}
+      setCards(cards.filter((c) => c._id !== card._id))
+      }).catch((err) => {
+        console.log(err);})
+  }
 
   function handleUpdateUser (inputValue) {
+    setButtonProfileText('Сохраняем...')
     api.setUserInfo(inputValue).then(res => {
       setCurrentUser(res);
       closeAllPopups()}).catch((err) => {
         console.log(err);
+      }).finally(() => {
+        setButtonProfileText('Сохранить')
       })
   }
 
   function handleUpdateAvatar (link) {
+    setButtonProfileText('Сохраняем...')
     api.editPhoto(link).then(res => {
       setCurrentUser(res);
       closeAllPopups()
     }).catch((err) => {
-      console.log(err)})
+      console.log(err)}).finally(() => {
+        setButtonProfileText('Сохранить')
+      })
   }
 
   function handleAddPlace (card) {
+    setButtonText('создаём...')
     api.addCard(card).then(newCard => {setCards([newCard, ...cards]);
     closeAllPopups()}).catch((err) => {
-      console.log(err)})
+      console.log(err)}).finally(() => {
+        setButtonText('создать')
+      })
   }
 
   function handleOverlayClick (evt) {
@@ -212,16 +224,19 @@ export default function App () {
         onUpdateUser = {handleUpdateUser}/>
 
         <EditAvatarPopup
+        buttonText={buttonProfileText}
         isOpened={isEditAvatarPopupOpen} 
         onClose={closeAllPopups}
         onOverlayClick = {handleOverlayClick}
         onUpdateAvatar={handleUpdateAvatar}/>
 
         <AddPlacePopup
+        buttonText={buttonProfileText}
         isOpened={isAddPlacePopupOpen}
         onClose={closeAllPopups} 
         onOverlayClick = {handleOverlayClick}
-        onAddPlace={handleAddPlace}/>
+        onAddPlace={handleAddPlace}
+        buttonText={buttonText} />
 
         <PopupWithForm title="Вы уверены?" buttonText="Да" name="confirmDeletion" onClose={closeAllPopups}onOverlayClick = {handleOverlayClick}>
         </PopupWithForm>
